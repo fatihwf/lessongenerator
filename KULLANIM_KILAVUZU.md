@@ -1,8 +1,8 @@
-# 🎓 Bloom Lesson Generator - Kullanım Kılavuzu
+#  Bloom Lesson Generator - Kullanım Kılavuzu
 
 Bu proje, Bloom taksonomisine dayalı, kişiselleştirilmiş ders içerikleri üreten bir yapay zeka uygulamasıdır.
 
-## 🚀 Hızlı Başlangıç (Windows)
+##  Hızlı Başlangıç (Windows)
 
 Proje klasöründeki **`run_app.bat`** dosyasına çift tıklamanız yeterlidir. Bu betik:
 1. Gerekli kütüphaneleri (`requirements.txt`) yükler.
@@ -11,7 +11,7 @@ Proje klasöründeki **`run_app.bat`** dosyasına çift tıklamanız yeterlidir.
 
 ---
 
-## 🛠 Ön Gereksinimler
+##  Ön Gereksinimler
 
 Uygulamanın çalışması için bilgisayarınızda şunların kurulu olması gerekir:
 
@@ -21,10 +21,10 @@ Uygulamanın çalışması için bilgisayarınızda şunların kurulu olması ge
 
 ---
 
-## 🌐 Erişim
+##  Erişim
 
 *   **Uygulama Arayüzü:** [http://localhost:3000](http://localhost:3000) (Açılan tarayıcı ekranı burası olmalıdır.)
 *   **API Dökümantasyonu:** [http://localhost:8080/docs](http://localhost:8080/docs)
 
-## 🔑 Yapılandırma
-Tüm API ve model ayarları ana dizindeki `.env` dosyasında yapılmıştır. Uygulama **OpenRouter** üzerinden **DeepSeek V4 Flash** modelini kullanmaktadır.
+##  Yapılandırma
+Kendi .env dosyanızı oluşturun ve keyinizi girin. 
