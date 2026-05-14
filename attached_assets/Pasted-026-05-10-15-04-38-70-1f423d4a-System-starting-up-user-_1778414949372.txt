@@ -1,0 +1,112 @@
+026-05-10 15:04:38.70
+1f423d4a
+System
+starting up user application
+2026-05-10 15:04:38.70
+1f423d4a
+System
+starting artifact processes for monorepo deployment
+2026-05-10 15:04:38.70
+1f423d4a
+System
+artifact mode enabled runnable=1 static=1
+2026-05-10 15:04:38.70
+1f423d4a
+System
+registered static handler for artifact path=/ publicDir=artifacts/bloom-frontend/dist/public
+2026-05-10 15:04:38.70
+1f423d4a
+System
+forwarding local port 0 to external port 80 (mapped as 1104)
+2026-05-10 15:04:38.70
+1f423d4a
+System
+waiting for runnable artifact ports ports=[8080]
+2026-05-10 15:04:38.70
+1f423d4a
+System
+baseline ports snapshot before artifact start ports=[1106 1105 1104]
+2026-05-10 15:04:38.71
+1f423d4a
+System
+starting artifact processes count=1
+2026-05-10 15:04:38.71
+1f423d4a
+System
+starting artifact process args=[/home/runner/workspace/.pythonlibs/bin/uvicorn main:app --host 0.0.0.0 --app-dir /home/runner/workspace/services/bloom-api] port=8080 artifact=artifacts/api-server
+2026-05-10 15:04:38.73
+1f423d4a
+System
+artifact process started pid=19 artifact=artifacts/api-server
+2026-05-10 15:04:42.82
+1f423d4a
+User
+INFO: Started server process [19]
+2026-05-10 15:04:42.82
+1f423d4a
+User
+INFO: Waiting for application startup.
+2026-05-10 15:04:42.82
+1f423d4a
+User
+2026-05-10T12:04:42.828320Z [info ] startup.begin [main]
+2026-05-10 15:04:44.36
+1f423d4a
+User
+2026-05-10T12:04:44.364616Z [info ] Database tables initialized [database]
+2026-05-10 15:04:44.56
+1f423d4a
+User
+2026-05-10T12:04:44.564882Z [info ] startup.done [main]
+2026-05-10 15:04:44.56
+1f423d4a
+User
+INFO: Application startup complete.
+2026-05-10 15:04:44.57
+1f423d4a
+User
+INFO: Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-05-10 15:05:38.70
+1f423d4a
+System
+seccomp port detection incomplete, trying /proc/net/tcp fallback expected=[8080] seccompDetected=0
+2026-05-10 15:05:38.70
+1f423d4a
+System
+not all artifact ports opened within timeout expected=[8080] detected=0
+2026-05-10 15:05:38.70
+1f423d4a
+System
+sending SIGTERM to artifact process artifact=artifacts/api-server
+2026-05-10 15:05:38.75
+1f423d4a
+User
+INFO: Shutting down
+2026-05-10 15:05:38.85
+1f423d4a
+User
+INFO: Waiting for application shutdown.
+2026-05-10 15:05:38.85
+1f423d4a
+User
+2026-05-10T12:05:38.851891Z [info ] shutdown.begin [main]
+2026-05-10 15:05:38.85
+1f423d4a
+User
+INFO: Application shutdown complete.
+2026-05-10 15:05:38.85
+1f423d4a
+User
+INFO: Finished server process [19]
+2026-05-10 15:05:38.85
+1f423d4a
+System
+all artifact processes stopped
+2026-05-10 15:05:38.85
+1f423d4a
+System
+a port configuration was specified but the required port was never opened
+2026-05-10 15:05:38.85
+1f423d4a
+System
+artifact process exited with error error=signal: terminated artifact=artifacts/api-server

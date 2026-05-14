@@ -1,0 +1,786 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Bloom-aware Personalized Lesson Generator API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: curriculum
+    description: Curriculum management
+  - name: profiles
+    description: Learner profile management
+  - name: bloom
+    description: Bloom taxonomy classification
+  - name: lessons
+    description: Lesson generation
+  - name: rag
+    description: Retrieval operations
+  - name: feedback
+    description: Feedback collection
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /curriculum/outcomes:
+    get:
+      operationId: listOutcomes
+      tags: [curriculum]
+      summary: List all curriculum outcomes
+      parameters:
+        - name: subject
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: grade
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: unit
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of curriculum items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CurriculumItem"
+    post:
+      operationId: createOutcome
+      tags: [curriculum]
+      summary: Create a curriculum outcome
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CurriculumItemInput"
+      responses:
+        "201":
+          description: Created outcome
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurriculumItem"
+
+  /curriculum/outcomes/{id}:
+    get:
+      operationId: getOutcome
+      tags: [curriculum]
+      summary: Get a curriculum outcome
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Curriculum item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurriculumItem"
+        "404":
+          description: Not found
+
+  /profiles:
+    get:
+      operationId: listProfiles
+      tags: [profiles]
+      summary: List learner profiles
+      responses:
+        "200":
+          description: List of profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LearnerProfile"
+    post:
+      operationId: createProfile
+      tags: [profiles]
+      summary: Create a learner profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LearnerProfileInput"
+      responses:
+        "201":
+          description: Created profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LearnerProfile"
+
+  /profiles/{id}:
+    get:
+      operationId: getProfile
+      tags: [profiles]
+      summary: Get a learner profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Learner profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LearnerProfile"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateProfile
+      tags: [profiles]
+      summary: Update a learner profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LearnerProfileUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LearnerProfile"
+
+  /bloom/classify:
+    post:
+      operationId: classifyBloom
+      tags: [bloom]
+      summary: Classify text by Bloom taxonomy level
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BloomClassifyInput"
+      responses:
+        "200":
+          description: Bloom classification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BloomAnnotation"
+
+  /lessons:
+    get:
+      operationId: listLessons
+      tags: [lessons]
+      summary: List generated lessons
+      parameters:
+        - name: profile_id
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: grade
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: subject
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of lessons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LessonSummary"
+    post:
+      operationId: generateLesson
+      tags: [lessons]
+      summary: Generate a personalized lesson
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LessonGenerateInput"
+      responses:
+        "201":
+          description: Generated lesson
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneratedLesson"
+
+  /lessons/stats:
+    get:
+      operationId: getLessonStats
+      tags: [lessons]
+      summary: Get lesson generation statistics
+      responses:
+        "200":
+          description: Stats summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonStats"
+
+  /lessons/{id}:
+    get:
+      operationId: getLesson
+      tags: [lessons]
+      summary: Get a generated lesson
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Generated lesson
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneratedLesson"
+        "404":
+          description: Not found
+
+  /lessons/{id}/trace:
+    get:
+      operationId: getLessonTrace
+      tags: [lessons]
+      summary: Get retrieval trace for a lesson
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Retrieval trace
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RetrievalTrace"
+
+  /rag/chunks:
+    get:
+      operationId: listChunks
+      tags: [rag]
+      summary: List knowledge chunks
+      parameters:
+        - name: subject
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: bloom_level
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of chunks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/KnowledgeChunk"
+    post:
+      operationId: createChunk
+      tags: [rag]
+      summary: Add a knowledge chunk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KnowledgeChunkInput"
+      responses:
+        "201":
+          description: Created chunk
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KnowledgeChunk"
+
+  /rag/retrieve:
+    post:
+      operationId: retrieveChunks
+      tags: [rag]
+      summary: Retrieve relevant knowledge chunks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RetrieveInput"
+      responses:
+        "200":
+          description: Retrieved chunks with scores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RetrievedChunk"
+
+  /feedback:
+    get:
+      operationId: listFeedback
+      tags: [feedback]
+      summary: List feedback records
+      responses:
+        "200":
+          description: List of feedback
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FeedbackRecord"
+    post:
+      operationId: submitFeedback
+      tags: [feedback]
+      summary: Submit feedback on a lesson
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackInput"
+      responses:
+        "201":
+          description: Submitted feedback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedbackRecord"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    CurriculumItem:
+      type: object
+      required: [id, subject, grade, unit, outcome_text, bloom_level, created_at]
+      properties:
+        id:
+          type: integer
+        subject:
+          type: string
+        grade:
+          type: string
+        unit:
+          type: string
+        outcome_text:
+          type: string
+        bloom_level:
+          type: string
+        secondary_bloom_levels:
+          type: array
+          items:
+            type: string
+        bloom_confidence:
+          type: ["number", "null"]
+        created_at:
+          type: string
+
+    CurriculumItemInput:
+      type: object
+      required: [subject, grade, unit, outcome_text]
+      properties:
+        subject:
+          type: string
+        grade:
+          type: string
+        unit:
+          type: string
+        outcome_text:
+          type: string
+        bloom_level:
+          type: ["string", "null"]
+
+    LearnerProfile:
+      type: object
+      required: [id, name, grade, proficiency_level, created_at]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        grade:
+          type: string
+        proficiency_level:
+          type: string
+        reading_level:
+          type: ["string", "null"]
+        preferred_style:
+          type: ["string", "null"]
+        weak_topics:
+          type: array
+          items:
+            type: string
+        strong_topics:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+
+    LearnerProfileInput:
+      type: object
+      required: [name, grade, proficiency_level]
+      properties:
+        name:
+          type: string
+        grade:
+          type: string
+        proficiency_level:
+          type: string
+        reading_level:
+          type: ["string", "null"]
+        preferred_style:
+          type: ["string", "null"]
+        weak_topics:
+          type: array
+          items:
+            type: string
+        strong_topics:
+          type: array
+          items:
+            type: string
+
+    LearnerProfileUpdate:
+      type: object
+      properties:
+        name:
+          type: ["string", "null"]
+        grade:
+          type: ["string", "null"]
+        proficiency_level:
+          type: ["string", "null"]
+        reading_level:
+          type: ["string", "null"]
+        preferred_style:
+          type: ["string", "null"]
+        weak_topics:
+          type: array
+          items:
+            type: string
+        strong_topics:
+          type: array
+          items:
+            type: string
+
+    BloomClassifyInput:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+        context:
+          type: ["string", "null"]
+
+    BloomAnnotation:
+      type: object
+      required: [primary_bloom_level, confidence, reasoning]
+      properties:
+        primary_bloom_level:
+          type: string
+        secondary_levels:
+          type: array
+          items:
+            type: string
+        confidence:
+          type: number
+        reasoning:
+          type: string
+        keywords_matched:
+          type: array
+          items:
+            type: string
+
+    LessonGenerateInput:
+      type: object
+      required: [outcome_id, profile_id]
+      properties:
+        outcome_id:
+          type: integer
+        profile_id:
+          type: integer
+        target_bloom_level:
+          type: ["string", "null"]
+        force_regenerate:
+          type: boolean
+          default: false
+
+    LessonSummary:
+      type: object
+      required: [id, lesson_title, unit, grade, subject, bloom_level, profile_id, cache_status, created_at]
+      properties:
+        id:
+          type: integer
+        lesson_title:
+          type: string
+        unit:
+          type: string
+        grade:
+          type: string
+        subject:
+          type: string
+        bloom_level:
+          type: string
+        profile_id:
+          type: integer
+        cache_status:
+          type: string
+        created_at:
+          type: string
+
+    LessonSections:
+      type: object
+      properties:
+        introduction:
+          type: string
+        explanation:
+          type: string
+        examples:
+          type: array
+          items:
+            type: string
+        practice:
+          type: array
+          items:
+            type: string
+        misconceptions:
+          type: array
+          items:
+            type: string
+        summary:
+          type: string
+        assessment:
+          type: array
+          items:
+            type: string
+
+    GeneratedLesson:
+      type: object
+      required: [id, lesson_title, unit, grade, subject, bloom_level, profile_id, sections, cache_status, created_at]
+      properties:
+        id:
+          type: integer
+        lesson_title:
+          type: string
+        unit:
+          type: string
+        grade:
+          type: string
+        subject:
+          type: string
+        bloom_level:
+          type: string
+        bloom_map:
+          type: array
+          items:
+            type: string
+        profile_id:
+          type: integer
+        personalization_summary:
+          type: object
+          additionalProperties: true
+        sections:
+          $ref: "#/components/schemas/LessonSections"
+        sources_used:
+          type: array
+          items:
+            type: string
+        cache_status:
+          type: string
+        created_at:
+          type: string
+
+    LessonStats:
+      type: object
+      required: [total_lessons, by_bloom_level, by_grade, cache_hit_rate, avg_sources_used]
+      properties:
+        total_lessons:
+          type: integer
+        by_bloom_level:
+          type: object
+          additionalProperties:
+            type: integer
+        by_grade:
+          type: object
+          additionalProperties:
+            type: integer
+        cache_hit_rate:
+          type: number
+        avg_sources_used:
+          type: number
+
+    KnowledgeChunk:
+      type: object
+      required: [id, content, source_type, subject, created_at]
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+        source_type:
+          type: string
+        subject:
+          type: string
+        grade:
+          type: ["string", "null"]
+        unit:
+          type: ["string", "null"]
+        bloom_levels:
+          type: array
+          items:
+            type: string
+        source_name:
+          type: ["string", "null"]
+        created_at:
+          type: string
+
+    KnowledgeChunkInput:
+      type: object
+      required: [content, source_type, subject]
+      properties:
+        content:
+          type: string
+        source_type:
+          type: string
+        subject:
+          type: string
+        grade:
+          type: ["string", "null"]
+        unit:
+          type: ["string", "null"]
+        bloom_levels:
+          type: array
+          items:
+            type: string
+        source_name:
+          type: ["string", "null"]
+
+    RetrieveInput:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+        bloom_level:
+          type: ["string", "null"]
+        subject:
+          type: ["string", "null"]
+        grade:
+          type: ["string", "null"]
+        top_k:
+          type: integer
+          default: 5
+
+    RetrievedChunk:
+      type: object
+      required: [chunk_id, content, score, source_type]
+      properties:
+        chunk_id:
+          type: integer
+        content:
+          type: string
+        score:
+          type: number
+        source_type:
+          type: string
+        bloom_levels:
+          type: array
+          items:
+            type: string
+
+    RetrievalTrace:
+      type: object
+      required: [chunk_id, content, score, bloom_match, source_type]
+      properties:
+        chunk_id:
+          type: integer
+        content:
+          type: string
+        score:
+          type: number
+        bloom_match:
+          type: boolean
+        source_type:
+          type: string
+
+    FeedbackRecord:
+      type: object
+      required: [id, lesson_id, rating, created_at]
+      properties:
+        id:
+          type: integer
+        lesson_id:
+          type: integer
+        rating:
+          type: integer
+        comment:
+          type: ["string", "null"]
+        bloom_accuracy:
+          type: ["integer", "null"]
+        personalization_accuracy:
+          type: ["integer", "null"]
+        created_at:
+          type: string
+
+    FeedbackInput:
+      type: object
+      required: [lesson_id, rating]
+      properties:
+        lesson_id:
+          type: integer
+        rating:
+          type: integer
+        comment:
+          type: ["string", "null"]
+        bloom_accuracy:
+          type: ["integer", "null"]
+        personalization_accuracy:
+          type: ["integer", "null"]

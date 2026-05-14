@@ -1,0 +1,169 @@
+PROJE ADI:
+Bloom-aware Personalized Lesson Generator
+
+AMAÇ:
+Kullanıcının verdiği ders, ünite ve kazanımlardan hareketle Bloom taksonomisine duyarlı, kişiselleştirilmiş ders anlatımı üreten bir sistem geliştir. Sistem RAG + CAG mimarisini birlikte kullanacak. CAG, öğretim bağlamı ve kişiselleştirme cache’i olarak çalışacak. RAG, kaynaklardan Bloom filtresiyle destekleyici bilgi çekecek.
+
+TEMEL KARARLAR:
+- CAG yalnızca çıktı cache’i değil, teaching-context cache olmalı.
+- Personalization, learner profile + mastery + preference + grade bazında yapılmalı.
+- Bloom seviyesi hem retrieval hem generation aşamasında kullanılmalı.
+- Sistem tamamen modüler ve test edilebilir olmalı.
+- Öncelik: doğru mimari, sonra optimize edilmiş performans.
+
+TEKNOLOJİ YIĞINI:
+- Backend: Python 3.11+
+- API: FastAPI
+- ORM: SQLAlchemy veya SQLModel
+- Validation: Pydantic
+- Vector DB: pgvector veya Chroma
+- Cache: Redis
+- DB: PostgreSQL
+- Background jobs: Celery veya RQ
+- Embeddings: seçilebilir provider abstraction
+- LLM adapter: provider bağımsız wrapper
+- Testing: pytest
+- Config: .env + pydantic settings
+- Logging: structlog veya standart logging
+- Containerization: Docker Compose
+
+SİSTEM MODÜLLERİ:
+
+1) ingestion/
+- Curriculum kazanımlarını yükleme
+- PDF/text/doc kaynaklarını parçalama
+- kaynak metadata çıkarımı
+- chunking + embedding pipeline
+
+2) bloom/
+- kazanım metnini analiz et
+- yenilenmiş Bloom taksonomisine göre sınıflandır
+- primary_bloom_level, secondary_levels, confidence üret
+- sınıflandırma sonuçlarını sakla
+
+3) profiles/
+- learner profile yönetimi
+- kullanıcıya ait grade, proficiency, reading_level, preferred_style, weak_topics, strong_topics alanlarını sakla
+- profile summary çıkar
+
+4) cag/
+- teaching-context cache tasarla
+- cache key üretimi:
+  grade + unit + outcome_id + bloom_level + learner_profile_signature + content_type + difficulty + curriculum_version
+- cache hit ise bağlamı döndür
+- miss ise context builder çalıştır
+- cache TTL ve invalidation destekle
+
+5) rag/
+- kaynakları metadata ile filtrele
+- Bloom seviyesine göre retrieval yap
+- semantic search + metadata filter + reranking uygulayabil
+- kaynak türleri: MEB kitabı, öğretmen notu, soru bankası, etkinlik föyü
+- retrieval sonuçlarını açıklanabilir şekilde logla
+
+6) planner/
+- gelen kazanım setini ders planına dönüştür
+- çıktı bölümleri:
+  - learning goals
+  - prerequisite knowledge
+  - explanation
+  - examples
+  - practice
+  - misconceptions
+  - summary
+  - assessment questions
+- her bölüm için Bloom seviyesine uygun alt strateji seç
+
+7) generation/
+- Bloom seviyesine göre prompt template oluştur
+- CAG context + RAG chunks + user profile birleşimiyle final output üret
+- aynı içerik için farklı profile’lara farklı anlatım varyantı üret
+- output formatı yapılandırılmış JSON olmalı
+
+8) evaluation/
+- Bloom uyumu kontrolü
+- pedagojik tutarlılık kontrolü
+- source grounding kontrolü
+- duplicate/redundant content kontrolü
+- response length ve readability kontrolü
+- unit test + integration test yaz
+
+VERİ MODELLERİ:
+- CurriculumItem
+- BloomAnnotation
+- LearnerProfile
+- KnowledgeChunk
+- TeachingContextCache
+- GeneratedLesson
+- RetrievalTrace
+- FeedbackRecord
+
+API ENDPOINTLERİ:
+- POST /curriculum/upload
+- POST /profile/update
+- POST /lesson/generate
+- GET /lesson/{id}
+- POST /feedback
+- POST /bloom/classify
+- POST /rag/retrieve
+- POST /cag/get-context
+
+ÇIKTI FORMATI:
+Lesson response JSON şu yapıda olsun:
+{
+  "lesson_title": "...",
+  "unit": "...",
+  "grade": "...",
+  "bloom_map": [...],
+  "personalization_summary": {...},
+  "sections": {
+    "introduction": "...",
+    "explanation": "...",
+    "examples": [...],
+    "practice": [...],
+    "misconceptions": [...],
+    "summary": "...",
+    "assessment": [...]
+  },
+  "sources_used": [...],
+  "cache_status": "hit|miss",
+  "retrieval_trace": [...]
+}
+
+PROMPT STRATEJİSİ:
+- Remembering: kısa tanım, temel bilgi, listeleme
+- Understanding: açıklama, örnekleme, neden-sonuç
+- Applying: işlem adımı, problem çözme, senaryo
+- Analyzing: karşılaştırma, ilişki kurma, parçalama
+- Evaluating: gerekçelendirme, doğru-yanlış tartışma
+- Creating: proje, deney, yeni örnek üretme
+
+ÖNEMLİ KISITLAR:
+- Uydurma bilgi üretme; RAG dışı iddialar açıkça işaretlensin.
+- Ders anlatımı Bloom seviyesini aşmasın.
+- Kişiselleştirme cache’i çok büyümesin; profile signature kullan.
+- Her modül ayrı test edilebilir olsun.
+- Kod okunabilir, tipli ve production-ready olsun.
+- Her major fonksiyona docstring ekle.
+- Hata yönetimi ve logging zorunlu olsun.
+
+MİMARİ HEDEF:
+- Önce temiz bir MVP üret.
+- Sonra Bloom sınıflandırma ve retrieval kalitesini artır.
+- Son aşamada caching ve personalization optimizasyonu yap.
+
+TESLİM BEKLENTİSİ:
+- Çalışan backend
+- örnek veri yükleme scripti
+- örnek lesson generation endpoint’i
+- testler
+- Docker Compose
+- README
+- örnek config dosyaları
+- modüler klasör yapısı
+- en az bir demo akış
+
+EĞER BELİRSİZLİK VARSA:
+- Tahmin yap, ama mimariyi bozma.
+- Kod içinde TODO bırakmak yerine makul varsayımla ilerle.
+- Önce çalışan sistem, sonra refine et.
